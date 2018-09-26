@@ -4,7 +4,6 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-import os
 from utils import parse_musescore
 from alignment import sw_alignment
 from pitchDetection.mfshs import MFSHS
@@ -42,4 +41,4 @@ if __name__ == '__main__':
 	wav_file = 'test.mp3'
 	input_json = 'input.json'
 	output_json = 'output.json'
-	_main(wav_file,input_json,output_json,mode)
+	_main(wav_file,input_json,output_json)
