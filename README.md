@@ -15,7 +15,7 @@
 
 ### run ###
 ```
-	python main.py
+python main.py
 ```
 
 onset detection method cite this paper
