@@ -7,8 +7,7 @@ from __future__ import absolute_import
 import os 
 import json
 import numpy as np 
-import config as cfg 
-
+import config as cfg
 
 def smooth_obs(obs):
     """

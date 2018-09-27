@@ -75,6 +75,7 @@ class Evaluator(object):
 		self.pauseLoc = pauseLoc
 
 		self.result_info,self.det_Note = [],[]
+		self._offset_frame = []
 		self.evalutate_save_file()
 
 
@@ -82,6 +83,11 @@ class Evaluator(object):
 	def det_note(self):
 		return self.det_Note
 
+
+	@property
+	def offset_amp_frame(self):
+		return self._offset_frame
+	
 	def pitches_to_result(self):
 		for idx,cur_onset_frame in enumerate(self.onset_frame):
 			bool_zero_loc = True if idx in self.pauseLoc else False
@@ -89,7 +95,7 @@ class Evaluator(object):
 			if idx in self.add_zero_loc:
 				pitch_info['onset'] = cur_onset_frame*hopsize_t*1000
 				pitch = np.zeros(10)
-				pitch = filter_pitch(pitch,self.score_note,bool_zero_loc)
+				pitch = filter_pitch(pitch,bool_zero_loc)
 				pitch_info['pitches'] = pitch.tolist()
 				pitch_info['flag'] = 10 if len(pitch)>10 else 0
 				self.result_info.append(pitch_info)
@@ -125,6 +131,9 @@ class Evaluator(object):
 				self.result_info.append(pitch_info)
 				note = np.array(pitch[:flag])
 				self.det_Note.append(np.round(np.mean(note)))
+
+				if(len(cur_zero_amp_loc)>0):
+					self._offset_frame.append(cur_zero_amp_loc[0])
 		return 
 
 
