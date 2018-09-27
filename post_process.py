@@ -122,6 +122,7 @@ class Evaluator(object):
 				pitch_info['flag'] = flag
 				pitch_info['pitches'] = pitch
 
+				self.result_info.append(pitch_info)
 				note = np.array(pitch[:flag])
 				self.det_Note.append(np.round(np.mean(note)))
 		return 

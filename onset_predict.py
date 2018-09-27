@@ -159,7 +159,7 @@ def detector_onset(wav_file,pitches,score_note):
 		pitch_info['pitch_length'] = len(pitch)
 		pitch_info['onset'] = cur_onset_frame
 		pitch_info['offset'] = offset_frame[idx]
-		pitch = smooth_pitches(np.array(pitch))
+		pitch = modify_pitches(np.array(pitch))
 		flag = offset_loc(pitch)
 		pitch_info['pitch_end'] = flag
 		result_info.append(pitch_info)
