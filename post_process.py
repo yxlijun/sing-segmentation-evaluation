@@ -96,7 +96,7 @@ class Evaluator(object):
 				pitch_info['onset'] = cur_onset_frame*hopsize_t*1000
 				pitch = np.zeros(10)
 				pitch = filter_pitch(pitch,bool_zero_loc)
-				pitch_info['pitches'] = pitch.tolist()
+				pitch_info['pitches'] = pitch
 				pitch_info['flag'] = 10 if len(pitch)>10 else 0
 				self.result_info.append(pitch_info)
 				self.det_Note.append(0.0)
