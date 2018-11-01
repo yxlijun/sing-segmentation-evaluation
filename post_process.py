@@ -63,7 +63,11 @@ class Evaluator(object):
 	"""
 		save result and give score
 	"""
-	def __init__(self, filename,onset_offset_pitches,zeroAmpLoc,score_note,pauseLoc):
+	def __init__(self, filename,
+				onset_offset_pitches,
+				zeroAmpLoc,score_note,
+				pauseLoc,
+				note_type=[]):
 		super(Evaluator, self).__init__()
 		self.filename = filename
 		self.onset_frame = onset_offset_pitches['onset_frame']
@@ -73,11 +77,11 @@ class Evaluator(object):
 		self.zeroAmpLoc = zeroAmpLoc
 		self.score_note = score_note
 		self.pauseLoc = pauseLoc
+		self.note_type = note_type
 
 		self.result_info,self.det_Note = [],[]
 		self._offset_frame = []
 		self.evalutate_save_file()
-
 
 	@property
 	def det_note(self):
@@ -191,11 +195,49 @@ class Evaluator(object):
 			score,is_octive,LowOctive = self.give_score()
 		for i in range(len(self.result_info)):
 			self.result_info[i]['octive'] = LowOctive[i]
+		#ref_note_duration = self.note_duration_evalute()
 		results = {
 			'score':score,
 			'is_octive':is_octive,
-			'pitches_info':self.result_info
+			'pitches_info':self.result_info,
+			#'ref_duration':ref_note_duration
 		}
 		with open(self.filename,'w') as fw:
 			json.dump(results,fw)
 		print('score:',score)
+
+	def note_duration_evalute(self):
+		assert(len(self.note_type)==len(self.result_info)),\
+		print("note type not equal result")
+		one_eighth_note_duration = np.array([self.result_info[i]['flag']\
+			for i in range(len(self.note_type)) if self.note_type[i]==1])
+		two_eighth_note_duration = np.array([self.result_info[i]['flag'] \
+			for i in range(len(self.note_type)) if self.note_type[i]==2])
+		three_eighth_note_duration = np.array([self.result_info[i]['flag']\
+			for i in range(len(self.note_type)) if self.note_type[i]==3])
+		two_eighth_note_duration = np.unique(two_eighth_note_duration)
+
+		#two_eighth_note_duration = np.append(two_eighth_note_duration,\
+		#	np.mean(two_eighth_note_duration))
+		min_dur = np.min(two_eighth_note_duration)
+		max_dur = np.max(two_eighth_note_duration)
+		ref_note_duration,max_num = 0,0
+		for ref_dur in range(min_dur+1,max_dur+1):
+			diff_one_eighth = np.abs(one_eighth_note_duration - (ref_dur//2))
+			tole_diff_one_eighth = one_eighth_note_duration*0.3
+
+			diff_two_eighth = np.abs(two_eighth_note_duration - ref_dur)
+			tole_diff_two_eighth = two_eighth_note_duration*0.3
+
+			diff_three_eighth = np.abs(three_eighth_note_duration-(ref_dur*2))
+			tole_diff_three_eighth = three_eighth_note_duration*0.3
+
+			total_num = np.sum((diff_one_eighth<=tole_diff_one_eighth).astype(int)) \
+						+ np.sum((diff_three_eighth<=tole_diff_three_eighth).astype(int))\
+						+ np.sum((diff_two_eighth<=tole_diff_two_eighth).astype(int))
+			if total_num>max_num:
+				ref_note_duration = int(ref_dur)
+				max_num = total_num
+		return ref_note_duration
+
+			

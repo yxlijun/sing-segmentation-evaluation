@@ -11,7 +11,7 @@ from pitchDetection.mfshs import MFSHS
 from onset_predict import detector_onset
 from post_process import Evaluator,trans_onset_and_offset
 from utils import parse_musescore,get_wav_and_json_file,save_files
-
+from visualization import visual_onset_offset_energes
 def main(wav_file,score_file):
 	'''
 		first detect pitches 
@@ -20,8 +20,10 @@ def main(wav_file,score_file):
 	mfshs.pitch_detector()
 	pitches = mfshs.pitches
 	zero_amp_frame = mfshs.zeroAmploc
+	energes = mfshs.energes
 
-	score_note,pauseLoc = parse_musescore(score_file)  ## parse musescore
+
+	score_note,note_type,pauseLoc = parse_musescore(score_file)  ## parse musescore
 	'''
 		second detect onset 
 	'''
@@ -37,12 +39,26 @@ def main(wav_file,score_file):
 	'''
 	onset_offset_pitches = trans_onset_and_offset(match_loc_info,onset_frame,pitches)
 	filename_json = os.path.splitext(wav_file)[0]+".json"
-	evaluator = Evaluator(filename_json,onset_offset_pitches,zero_amp_frame,score_note,pauseLoc)
-	save_files(wav_file,onset_frame,pitches,evaluator.det_note,score_note)
+	evaluator = Evaluator(filename_json,
+						onset_offset_pitches,
+						zero_amp_frame,
+						score_note,
+						pauseLoc,
+						note_type)
+	save_files(wav_file,
+				onset_frame,
+				pitches,
+				evaluator.det_note,
+				score_note)
 
+
+	'''
+		visualization
+	'''
+	#visual_onset_offset_energes(onset_frame,evaluator.offset_amp_frame,energes)
 
 if __name__ == '__main__':
-	root_path = os.path.join(os.path.dirname(__file__),'data','0')
+	root_path = os.path.join(os.path.dirname(__file__),'data','2000')
 	wav_files,score_json = [],[]
 	get_wav_and_json_file(root_path,wav_files,score_json)
 	start_time = time.time()

@@ -102,7 +102,7 @@ def parse_musescore(filename):
 		score_info = json.load(fr)
 	linenumber = len(score_info['noteInfo'])
 	pauseLoc,pitchesLoc = [],[]
-	score_pitches = []
+	score_pitches,note_types = [],[]
 	count = 0
 	for number in range(linenumber):
 		noteList = score_info['noteInfo'][number]['noteList']
@@ -110,6 +110,8 @@ def parse_musescore(filename):
 			if int(note_info['pitch'])!=0:
 				score_pitches.append(int(note_info['pitch']))
 				pitchesLoc.append(count)
+				note_type = cfg.note_type_param[float(note_info['type'])]
+				note_types.append(note_type)
 			else:
 				pauseLoc.append(count)
 			count+=1
@@ -117,7 +119,7 @@ def parse_musescore(filename):
 		index = np.where(np.array(pitchesLoc)<pause)[0]
 		pauseLoc[i] = index[-1] if len(index)>0 else 0
 		
-	return score_pitches,pauseLoc
+	return score_pitches,note_types,pauseLoc
 
 
 def smooth_pitches(cur_pitches):
@@ -126,7 +128,7 @@ def smooth_pitches(cur_pitches):
 
 	'''
 	pitches_ = cur_pitches.astype(int)
-	indices = np.where(pitches_>25)[0]
+	indices = np.where(pitches_>20)[0]
 	std_pitches = pitches_[indices]
 	counts = np.bincount(std_pitches)
 	if len(counts)>0:
@@ -146,7 +148,7 @@ def filter_pitch(cur_pitches,bool_zero_loc=False):
 	return:
 		pitches
  	'''
-	max_note,min_note = 60,25
+	max_note,min_note = 60,20
 	cur_pitches = np.array(cur_pitches)
 	cur_pitches[np.where(cur_pitches>max_note)[0]] = 0.0
 	cur_pitches[np.where(cur_pitches<min_note)[0]] = 0.0

@@ -23,7 +23,7 @@ hammingWindow = np.zeros(windowLength)
 
 def callHamming():
     ''' 
-        calculate 汉明窗
+        calculate 汉明�?
     '''
     global hammingWindow
     for i in range(0,windowLength):
@@ -72,10 +72,10 @@ class MFSHS(object):
     def run(self,start,end):
         for index in range(start,end):
             meanAmp = np.mean(np.abs(self.xFrame[index,:]))
-            note = self.getNode(self.xFrame[index,:]) if meanAmp>0.01 else 0
+            note = self.getNode(self.xFrame[index,:]) if meanAmp>0.005 else 0
             self.pitch[index] = note
             self.energe[index] = meanAmp
-            if meanAmp<0.01:
+            if meanAmp<0.005:
                 self.zeroamploc.append(index)
 
 
@@ -132,7 +132,7 @@ class MFSHS(object):
     @property
     def zeroAmploc(self):
         '''
-            过零点位置
+            过零点位�?
         '''
         return np.array(sorted(self.zeroamploc))
 
