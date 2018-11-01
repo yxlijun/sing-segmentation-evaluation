@@ -28,6 +28,27 @@ min_continue_time = onset_det_param['min_continue_time']
 onset_distance = onset_det_param['onset_distance']
 
 
+def load_cnn_model():
+	model_joint = load_model(model_joint_path)
+	scaler_joint = pickle.load(open(model_scaler_path))
+	return model_joint,scaler_joint
+
+def det_syllable_prob(wav_file,model_joint,scaler_joint):
+	log_mel_old = get_log_mel_madmom(wav_file,fs=fs_wav,hopsize_t=hopsize_t,channel=1)
+	log_mel = scaler_joint.transform(log_mel_old)
+	log_mel = feature_reshape(log_mel,nlen=7)
+	log_mel = np.expand_dims(log_mel,axis=1)
+
+	obs_syllable, obs_phoneme = model_joint.predict(log_mel, batch_size=128, verbose=2)
+
+	obs_syllable = np.squeeze(obs_syllable)
+	obs_syllable = smooth_obs(obs_syllable)
+	obs_syllable[0] = 1.0
+	obs_syllable[-1] = 0.0
+	return obs_syllable
+
+
+
 def syllable_prob(wav_file):
 	'''
 		load model and get syllable Probability
@@ -52,12 +73,11 @@ def syllable_prob(wav_file):
 
 
 
-def detector_onset(wav_file,pitches,score_note):
+def detector_onset(obs_syllable,pitches,score_note):
 	'''
 		peak detect to get onset time
 
 	'''
-	obs_syllable = syllable_prob(wav_file)
 	obs_syllable = obs_syllable*100
 	peak = collections.OrderedDict()
 	score_length = len(score_note)
@@ -172,11 +192,11 @@ def detector_onset(wav_file,pitches,score_note):
 		pitch_on_length  = np.append(pitch_on_length,info['pitch_end'])
 		pitch_onset_frame = np.append(pitch_onset_frame,info['onset'])
 		pitch_end_loc = np.append(pitch_end_loc,info['pitch_end']+info['onset'])
-	
+	'''
 	if len(real_onset_frame)>score_length:
 		excessLength = len(real_onset_frame)-score_length
 		del_onset = np.argsort(pitch_on_length)[0:excessLength]
 		pitch_onset_frame = np.array(np.delete(pitch_onset_frame,del_onset))
 		real_onset_frame = pitch_onset_frame
-
+	'''
 	return real_onset_frame
