@@ -84,7 +84,6 @@ def get_log_mel_madmom(audio_fn, fs, hopsize_t, channel):
     """
     madmomMelbankProc = MadmomMelbankProcessor(fs, hopsize_t)
     mfcc = madmomMelbankProc(audio_fn)
-
     if channel == 1:
         mfcc = _nbf_2D(mfcc, 7)
     else:

@@ -35,6 +35,7 @@ def load_cnn_model():
 
 def det_syllable_prob(wav_file,model_joint,scaler_joint):
 	log_mel_old = get_log_mel_madmom(wav_file,fs=fs_wav,hopsize_t=hopsize_t,channel=1)
+	print(log_mel_old.shape)
 	log_mel = scaler_joint.transform(log_mel_old)
 	log_mel = feature_reshape(log_mel,nlen=7)
 	log_mel = np.expand_dims(log_mel,axis=1)
