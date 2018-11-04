@@ -29,6 +29,10 @@ class Server():
         self.wav_files = {}
         self.out_jsons = {}
 
+        self.pitches = {}
+        self.zero_amp_frame = {}
+        self.obs_syllable = {}
+
         self._queue_socket = Queue.Queue()
         print('start receive client--------')
 
@@ -53,14 +57,30 @@ class Server():
                         print 'receive data error'
                         self.inputs.remove(cur_s)
                     else:
-                        if data :
-                            wav_file,input_json,out_json,useid = data.split('+')
+                        if data:
+                            wav_file,input_json,out_json,useid,flag = data.split('+')
                             self.inputs.remove(cur_s)
                             if useid not in self.wav_files.keys():
                                 self.input_jsons[useid] = input_json
-                                self.wav_files[useid] = wav_file
+                                self.wav_files[useid] = list()
                                 self.out_jsons[useid] = out_json
-                            self.detect(useid)
+                                self.pitches[useid] = np.array([])
+                                self.zero_amp_frame[useid] = np.array([])
+                                self.obs_syllable[useid] = np.array([])
+
+                            self.wav_files[useid].append(wav_file)
+                            pitches,zero_amp_frame = self.pitch_detect(wav_file)
+                            obs_syllable = det_syllable_prob(wav_file,
+                                                            self.model_joint,
+                                                            self.scaler_joint)
+
+                            self.pitches[useid] = np.concatenate((self.pitches[useid],pitches),axis=0)
+                            self.zero_amp_frame[useid] = np.concatenate((self.zero_amp_frame[useid],zero_amp_frame),axis=0)
+                            self.obs_syllable[useid] = np.concatenate((self.obs_syllable[useid],obs_syllable),axis=0)
+                            print(wav_file,self.pitches[useid].shape,self.obs_syllable[useid].shape)
+
+                            if int(flag)==1:
+                                self.detect(useid)  
 
 
     def pitch_detect(self,wav_file):
@@ -73,29 +93,34 @@ class Server():
 
     def detect(self,useid):
         start_time = time.time()
-        wav_file = self.wav_files[useid]
+        #wav_file = self.wav_files[useid]
         out_json = self.out_jsons[useid]
-        pitches,zero_amp_frame = self.pitch_detect(wav_file)
-        obs_syllable = det_syllable_prob(wav_file,
+        '''
+        for wav_file in self.wav_files[useid]:
+            pitches,zero_amp_frame = self.pitch_detect(wav_file)
+            obs_syllable = det_syllable_prob(wav_file,
                                         self.model_joint,
                                         self.scaler_joint)
+            self.pitches[useid] = np.concatenate((self.pitches[useid],pitches),axis=0)
+            self.zero_amp_frame[useid] = np.concatenate((self.zero_amp_frame[useid],zero_amp_frame),axis=0)
+            self.obs_syllable[useid] = np.concatenate((self.obs_syllable[useid],obs_syllable),axis=0)
+        '''
         score_note,note_type,pauseLoc = parse_musescore(self.input_jsons[useid])
-        onset_frame = detector_onset(obs_syllable,
-                                    pitches,
+        onset_frame = detector_onset(self.obs_syllable[useid],
+                                    self.pitches[useid],
                                     score_note)
-        match_loc_info = sw_alignment(pitches,
+        match_loc_info = sw_alignment(self.pitches[useid],
                                     onset_frame,
                                     score_note)
         onset_offset_pitches = trans_onset_and_offset(match_loc_info,
                                                     onset_frame,
-                                                    pitches)
+                                                    self.pitches[useid])
         evaluator = Evaluator(out_json,
                         onset_offset_pitches,
-                        zero_amp_frame,
+                        self.zero_amp_frame[useid],
                         score_note,
                         pauseLoc,
                         note_type)
-
         self.clear(useid)
         print time.time()-start_time
 
@@ -103,6 +128,9 @@ class Server():
         del self.out_jsons[useid]
         del self.wav_files[useid]
         del self.input_jsons[useid]
+        del self.pitches[useid]
+        del self.zero_amp_frame[useid]
+        del self.obs_syllable[useid]
 
 if __name__ == "__main__":
     s = Server()

@@ -10,6 +10,7 @@ import numpy as np
 from config import pitch_det_param
 from multiprocessing import Process,cpu_count,Manager
 
+import time 
 
 fftLength = pitch_det_param['fftLength']
 windowLength = pitch_det_param['windowLength']
@@ -61,8 +62,8 @@ class MFSHS(object):
         '''
         process_list = []
         for index in xrange(self.process_num):
-            p = Process(target=self.run,args=(self.nFrame//self.process_num*index,
-                self.nFrame//self.process_num*(index+1)))
+            p = Process(target=self.run,args=(self.nFrame*index//self.process_num,
+                self.nFrame*(index+1)//self.process_num))
             p.start()
             process_list.append(p)
         for process in process_list:
