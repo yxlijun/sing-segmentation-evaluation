@@ -121,7 +121,6 @@ class Evaluator(object):
 				slience_pitch = np.zeros(sample_slience_len)
 				pitch = np.append(voice_pitch,slience_pitch).tolist()
 				pitch = filter_pitch(pitch,bool_zero_loc)
-
 				if (len(pitch)-sample_voice_len)<15:
 					pitch = pitch[:sample_voice_len]
 				else:

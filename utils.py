@@ -8,6 +8,7 @@ import os
 import json
 import numpy as np 
 import config as cfg
+from collections import Counter
 
 def smooth_obs(obs):
     """
@@ -62,7 +63,7 @@ def modify_pitches(_pitches):
 	if isinstance(_pitches,list):
 		result_pitches = 	[]
 		for pitches in _pitches:
-			max_note,min_note = 60,20
+			max_note,min_note = 70,20
 			pitches = np.array(pitches)
 			pitches[np.where(pitches>max_note)[0]] = 0.0
 			pitches[np.where(pitches<min_note)[0]] = 0.0
@@ -78,7 +79,7 @@ def modify_pitches(_pitches):
 			result_pitches.append(dpitches)
 		return result_pitches
 	else:
-		max_note,min_note = 60,20
+		max_note,min_note = 70,20
 		pitches = np.array(_pitches)
 		pitches[np.where(pitches>max_note)[0]] = 0.0
 		pitches[np.where(pitches<min_note)[0]] = 0.0
@@ -135,8 +136,21 @@ def smooth_pitches(cur_pitches):
 		mode_pitch = np.argmax(counts)
 		for i,pitch in enumerate(pitches_):
 			cur_pitches[i] = mode_pitch if abs(pitch - mode_pitch)>8 and pitch>20 else cur_pitches[i]
-	return cur_pitches
+	flag = offset_loc(cur_pitches)
+	pitch = cur_pitches[0:flag]
+	pitch = pitch.astype(int)
 
+	unique_pitch = np.unique(pitch)
+	maxnum_pitch = Counter(pitch).most_common(1)[0][0]
+	max_indices = np.where(pitch==maxnum_pitch)[0]
+	pitches = cur_pitches.copy()
+	for _p in unique_pitch:
+		if abs(_p - maxnum_pitch)>1:
+			indices = np.where(pitch==_p)[0]
+			for idx in indices:
+				rand_id = np.random.permutation(len(max_indices))[0]
+				cur_pitches[idx] = cur_pitches[max_indices[rand_id]]
+	return cur_pitches
 
 
 def filter_pitch(cur_pitches,bool_zero_loc=False):
@@ -148,7 +162,7 @@ def filter_pitch(cur_pitches,bool_zero_loc=False):
 	return:
 		pitches
  	'''
-	max_note,min_note = 60,25
+	max_note,min_note = 70,25
 	cur_pitches = np.array(cur_pitches)
 	cur_pitches[np.where(cur_pitches>max_note)[0]] = 0.0
 	cur_pitches[np.where(cur_pitches<min_note)[0]] = 0.0

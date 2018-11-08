@@ -61,9 +61,7 @@ class Server():
                             wav_file,input_json,out_json,useid,flag = data.split('+')
                             self.inputs.remove(cur_s)
                             if useid not in self.wav_files.keys():
-                                self.input_jsons[useid] = input_json
                                 self.wav_files[useid] = list()
-                                self.out_jsons[useid] = out_json
                                 self.pitches[useid] = np.array([])
                                 self.zero_amp_frame[useid] = np.array([])
                                 self.obs_syllable[useid] = np.array([])
@@ -80,7 +78,9 @@ class Server():
                             print(wav_file,self.pitches[useid].shape,self.obs_syllable[useid].shape)
 
                             if int(flag)==1:
-                                self.detect(useid)  
+                                self.out_jsons[useid] = out_json
+                                self.input_jsons[useid] = input_json
+                                self.detect(useid)
 
 
     def pitch_detect(self,wav_file):
