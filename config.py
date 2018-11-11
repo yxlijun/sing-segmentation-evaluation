@@ -54,7 +54,7 @@ post_process_param = {
 
 score_json_name=['1A_35','1A_22','C_01','C_02','C_03',
 				'C_04','C_05','Jingle_Bells','Poem_Chorus_final',
-				'Yankee_Doodle_final','You_and_Me']
+				'Yankee_Doodle_final','You_and_Me','G1-1']
 
 
 
