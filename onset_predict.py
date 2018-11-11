@@ -86,8 +86,9 @@ def detector_onset(obs_syllable,pitches,score_note):
 				and (obs_syllable[idx]-obs_syllable[idx+1]>0) and (obs_syllable[idx]>1.5):
 			peak[idx] = obs_syllable[idx]
 	if len(peak.keys())<2:
-		result_info = {'onset_frame':[],'onset_time':[]}
-		return result_info
+		#result_info = {'onset_frame':[],'onset_time':[]}
+		real_onset_frame = []
+		return real_onset_frame
 	syllable_onset = peak.keys()[0:-1]
 	syllable_offset = peak.keys()[1:]
 
