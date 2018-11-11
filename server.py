@@ -67,7 +67,7 @@ class Server():
                             wav_file,input_json,out_json,useid,flag = data.split('+')
                             self.inputs.remove(cur_s)
                             if useid not in self.wav_files.keys():
-                                self.wav_files[useid] = list()
+                               	self.wav_files[useid] = list()
                                 self.pitches[useid] = np.array([])
                                 self.used_wavs[useid] = list()
                                 self.flags[useid] = list()
@@ -119,21 +119,23 @@ class Server():
                                 for wav in self.used_wavs[useid]:
                                     wav_id =  int(os.path.basename(wav).split('.')[0])
                                     if (nowav_id - wav_id == 1):
-                                        pitches,zero_amp_frame = self.pitch_detect(nowav)
-                                        obs_syllable = det_syllable_prob(nowav,
-                                                                        self.model_joint,
-                                                                        self.scaler_joint)
+										pitches,zero_amp_frame = self.pitch_detect(nowav)
+										obs_syllable = det_syllable_prob(nowav,
+										                                self.model_joint,
+										                                self.scaler_joint)
 
-                                        self.pitches[useid] = np.concatenate((self.pitches[useid],pitches),axis=0)
-                                        self.zero_amp_frame[useid] = np.concatenate((self.zero_amp_frame[useid],zero_amp_frame),axis=0)
-                                        self.obs_syllable[useid] = np.concatenate((self.obs_syllable[useid],obs_syllable),axis=0)
-                                        print(nowav,self.pitches[useid].shape,self.obs_syllable[useid].shape)
-                                        self.used_wavs[useid].append(nowav)
+										self.pitches[useid] = np.concatenate((self.pitches[useid],pitches),axis=0)
+										self.zero_amp_frame[useid] = np.concatenate((self.zero_amp_frame[useid],zero_amp_frame),axis=0)
+										self.obs_syllable[useid] = np.concatenate((self.obs_syllable[useid],obs_syllable),axis=0)
+										print(nowav,self.pitches[useid].shape,self.obs_syllable[useid].shape)
+										self.used_wavs[useid].append(nowav)
                             self.wav_files[useid].append(wav_file)
                             end = (len(self.wav_files[useid])==len(self.used_wavs[useid]))
-                            if (1 in self.flags[useid]) and end:
+                            if int(flag)==1:
                                 self.out_jsons[useid] = out_json
                                 self.input_jsons[useid] = input_json
+
+                            if (1 in self.flags[useid]) and end:
                                 self.detect(useid)
 
 
