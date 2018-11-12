@@ -5,11 +5,14 @@ from __future__ import absolute_import
 import os 
 
 note_type_param = {
+	0.0625:0.5,
 	0.125:1,
 	0.25:2,
 	0.375:3,
 	0.5:4,
-	0.75:5,
+	0.625:5,
+	0.75:6,
+	0.875:7,
 	1.0:8
 }
 
