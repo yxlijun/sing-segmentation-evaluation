@@ -111,7 +111,11 @@ def parse_musescore(filename):
 			if int(note_info['pitch'])!=0:
 				score_pitches.append(int(note_info['pitch']))
 				pitchesLoc.append(count)
-				note_type = cfg.note_type_param[float(note_info['type'])]
+				type_key = float(note_info['type'])
+				if type_key in cfg.note_type_param.keys():
+					note_type = cfg.note_type_param[float(note_info['type'])]
+				else:
+					note_type = -1
 				note_types.append(note_type)
 			else:
 				pauseLoc.append(count)
